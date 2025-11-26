@@ -1,34 +1,37 @@
+<!DOCTYPE html>
 <html>
   <head>
+    <meta charset="utf-8">
+    <title>Copy to Clipboard</title>
     <script>
-      window.onload = function(){
+      window.onload = async function(){
         const url = new URL(window.location.href)
-        var text;
+        var bodyText
+        var success = false
+
         if(url.searchParams.has("copy")){
-          text = url.searchParams.get("copy")
+          const text = url.searchParams.get("copy")
           bodyText = "Copied text \"" + text + "\" to the clipboard."
-          var success;
           try {
-            navigator.clipboard.writeText(text)
+            if (!navigator.clipboard || !navigator.clipboard.writeText) {
+              throw new Error("Clipboard API unavailable")
+            }
+            await navigator.clipboard.writeText(text)
             success = true
           } catch (e) {
             bodyText = "Failed to set text to clipboard. Copy it manually: " + text
-            success = false
           }
         } else {
           bodyText = "No \"copy\" parameter applied to URL."
-          success = false
         }
         
         const textnode = document.createTextNode(bodyText);
         document.body.appendChild(textnode);
 
         if(success){
-          window.setTimeout(async function(){
-            if (await navigator.clipboard.readText() == text){
-              window.close()
-            }
-          }, 1000)
+          window.setTimeout(function(){
+            window.close()
+          }, 500)
         }
       }
     </script>
